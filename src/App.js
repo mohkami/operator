@@ -1,5 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {reactLocalStorage} from 'reactjs-localstorage';
+import { Formik, Form, Field } from 'formik';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteForever from '@material-ui/icons/DeleteForever';
 
 import './App.css';
 import defaultValues from './default-values'
@@ -14,6 +18,11 @@ const fetchOrPrepopulate = (key, defaultValues) => {
 
 
 function App() {
+    const [updatingVersion, setUpdatingVersion] = useState(0);
+
+    const [todoFormShown, setTodoFormShown] = useState(false);
+    const [shortcutFormShown, setShortcutFormShown] = useState(false);
+
     let urls = fetchOrPrepopulate('urls', defaultValues.urls);
     let todos = fetchOrPrepopulate('todos', defaultValues.todos);
 
@@ -30,40 +39,142 @@ function App() {
       window.location = urlItem.url;
       return null;
     }
-
-    const shortcuts = Object.keys(keyToUrlItem).map(
-      key => <p key={key}>{key}: {keyToUrlItem[key].description} -> <a href={keyToUrlItem[key].url}>{keyToUrlItem[key].url}</a></p>
-      );
-
-    const todoItems = todos.map((todoItem, idx) => 
-    <div key={todoItem['title']}>
-      <h4 style={{color: todoItem['done'] === undefined ? 'orange' : todoItem['done'] ? 'green' : 'red'}}>{idx + 1}_ {todoItem['title']}</h4>
-      {todoItem.desc && todoItem.desc}
-      {todoItem.link && (<p><a href={todoItem.link}>{todoItem.link}</a></p>)}
-    </div>
-    );
     
-    const sections = [
-      {
-        header: 'Todos',
-        items: todoItems
-      },
-      {
-        header: 'Shortcuts',
-        items: shortcuts
-      },
-    ]
-    
-    return <div style={{"margin":"40px"}}>
-      {sections.map((section, idx) =>
-        section['items'].length !== 0 &&
-        <div key={idx}>
-          <h3>{section['header']}</h3>
-          {section['items']}
-          <hr/>
+    return <>
+     <div style={{margin: "40px"}}>
+
+        {/* TODO items */}
+
+        <div style={{marginBottom: "40px"}}>
+          <h3>Todos</h3>
+          {todos.length !== 0 &&
+            <>
+              <div style={{marginBottom: "30px"}}>
+                {todos.map((todoItem, idx) => 
+                  <div key={todoItem['title'] + idx}>
+                    <div style={{display: "flex", alignItems: "center", marginBottom: "0px"}}>
+
+                      <IconButton aria-label="Delete" component="span" onClick={() => {
+                          reactLocalStorage.setObject('todos', todos.filter(item => item.title !== todoItem.title));
+                          setUpdatingVersion(updatingVersion + 1);
+                        }
+                      }>
+                        <DeleteForever />
+                      </IconButton>
+
+                      <h4 style={{color: todoItem['done'] === undefined ? 'orange' : todoItem['done'] ? 'green' : 'red'}}>{idx + 1}_ {todoItem['title']}</h4>
+                    </div>
+                    {todoItem.desc && todoItem.desc}
+                    {todoItem.link && (<div><a href={todoItem.link}>{todoItem.link}</a></div>)}
+                  </div>)
+                }
+              </div>
+              <hr/>
+            </>
+          }
+          {todoFormShown ? 
+            <Formik
+              initialValues={{ title: '', link: '' }}
+              onSubmit={(values) => {
+                todos.push({title: values.title, link: values.link});
+                reactLocalStorage.setObject('todos', todos);
+                setTodoFormShown(false);
+              }}
+            >
+              <Form>
+                <div style={{display: "flex", width: "500px", marginBottom: "5px"}}>
+                  <label htmlFor="title" style={{flex: 1}}>Title</label>
+                  <div style={{"flex": 4}}>
+                    <Field type="text" name="title" style={{width:"100%"}}/>
+                  </div>
+                </div>
+                <div style={{display: "flex", width: "500px", marginBottom: "5px"}}>
+                  <label htmlFor="link" style={{"flex": 1}}>Link</label>
+                  <div style={{"flex": 4}}>
+                    <Field type="text" name="link" style={{width:"100%"}}/>
+                  </div>
+                </div>
+                <div style={{display: "flex"}}>
+                  <Button type="submit" style={{marginRight: "5px"}} variant="contained" color="primary">
+                    Submit
+                  </Button>
+                  <Button color="primary" onClick={() => setTodoFormShown(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </Form>
+            </Formik>
+            : 
+            <Button color="primary" onClick={() => setTodoFormShown(true)}> + Add todo</Button>
+        }
         </div>
-        )}
-    </div>;
+
+
+        {/* SHORTCUTS */}
+
+        <h3>Shortcuts</h3>  
+        {urls.length !== 0 &&
+          <div>
+            {Object.keys(keyToUrlItem).map(key => (
+                <div key={key} style={{display: "flex", alignItems: "center"}}>
+                  
+                  <IconButton aria-label="Delete" component="span" onClick={() => {
+                      reactLocalStorage.setObject('urls', urls.filter(urlItem => urlItem.keyword !== keyToUrlItem[key].keyword));
+                      setUpdatingVersion(updatingVersion + 1);
+                    }}>
+                    <DeleteForever />
+                  </IconButton>
+
+                  <p>{key}: {keyToUrlItem[key].description} -> <a href={keyToUrlItem[key].url}>{keyToUrlItem[key].url}</a></p>
+                </div>
+                )
+            )}
+            <hr/>
+          </div>
+        }
+        {shortcutFormShown ? 
+          <Formik
+          initialValues={{ keyword: '', description: '', url: '' }}
+          onSubmit={(values) => {
+            urls.push({keyword: values.keyword, url: values.url, description: values.description});
+            reactLocalStorage.setObject('urls', urls);
+            setShortcutFormShown(false);
+          }}
+        >
+          <Form>
+            <div style={{"display": "flex", "width": "500px", "marginBottom": "5px"}}>
+              <label htmlFor="keyword" style={{"flex": 1}}>Keyword</label>
+              <div style={{"flex": 2}}>
+                <Field type="text" name="keyword"/>
+              </div>
+            </div>
+            <div style={{"display": "flex", "width": "500px", "marginBottom": "5px"}}>
+              <label htmlFor="description" style={{"flex": 1}}>Description</label>
+              <div style={{"flex": 2}}>
+                <Field type="text" name="description" style={{width:"100%"}}/>
+              </div>
+            </div>
+            <div style={{"display": "flex", "width": "500px", "marginBottom": "5px"}}>
+              <label htmlFor="url" style={{"flex": 1}}>Url</label>
+              <div style={{"flex": 2}}>
+                <Field type="text" name="url" style={{width:"100%"}}/>
+              </div>
+            </div>
+            <div style={{"display": "flex"}}>
+              <Button type="submit" style={{marginRight: "5px"}} variant="contained" color="primary">
+                Submit
+              </Button>
+              <Button color="primary" onClick={() => setShortcutFormShown(false)}>
+                Cancel
+              </Button>
+            </div>
+            </Form>
+          </Formik>
+          : 
+          <Button color="primary" onClick={() => setShortcutFormShown(true)}> + Add shortcut</Button>
+        }
+    </div>
+    </>;
 }
 
 export default App;
