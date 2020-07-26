@@ -1,0 +1,15 @@
+{
+  "urls": [
+    {
+      "keyword": "pr",
+      "url": "https://github.com/pulls", 
+      "description": "Go to the list of PRs"
+    }
+  ],
+  "todos": [  
+    {
+      "title": "Listen to the Podcast",
+      "link": "https://tim.blog/2020/07/23/brad-feld/"
+    }
+  ]
+}
