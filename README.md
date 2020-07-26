@@ -1,68 +1,46 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Operator
+This is a productivity tool that helps you get to the website you intend to get to with just one a couple of keystrokes. Think of it as a bookmark tool, but with hotkeys.
 
-## Available Scripts
+## Setup
+1_ Clone the repo:
+```
+git clone https://github.com/mohkami/operator.git
+```
+2_ Go to the directory it has been cloned to:
+```
+cd operator
+```
 
-In the project directory, you can run:
+3_ Update the `src/default-values.json` file following the existing example there to add your keywords and their corresponding urls.
 
-### `yarn start`
+Now you can either use Docker to make things easier for you, or just run it as a server on your local machine.
+### Using Docker (my recommendation):
+4_ Build the image:
+```
+docker build --tag operator:1.0 .
+```
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+4_ Create and run a container in the background using the image:
+```
+docker run --publish 3000:3000 --detach --name operator operator:1.0
+```
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+### Using Yarn Start in local:
+5_ Run the following command to start the server locally:
+```
+yarn start
+```
 
-### `yarn test`
+### Usage
+1_ Add a search engine to your chrome. For this, you need to go to the page that allows you to edit the search engines. Either right click on your url input and click on "Edit Search Engines..." or just paste this `chrome://settings/searchEngines` in your url.
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2_ Click on the Add button on the page to add a new search engine to your chrome and input the following values:
+![image](https://user-images.githubusercontent.com/4794780/88469389-1296ff00-cea6-11ea-899b-ffcd01699915.png)
 
-### `yarn build`
+3_ Now you just need to enter `o` in your url and press tab to see the following:
+![image](https://user-images.githubusercontent.com/4794780/88469493-ec259380-cea6-11ea-8d26-138385db5e01.png)
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+4_ Now just give it the keyword you've already set in the `src/default-values.json` file. For example:
+![image](https://user-images.githubusercontent.com/4794780/88469544-5a6a5600-cea7-11ea-8e41-f401b69f850b.png)
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+5_ This takes me to my Pull Requests page on Github.
