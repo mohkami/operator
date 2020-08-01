@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
+import {isEmpty} from 'lodash';
 import {reactLocalStorage} from 'reactjs-localstorage';
 import { Formik, Form, Field } from 'formik';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteForever from '@material-ui/icons/DeleteForever';
+import EditIcon from '@material-ui/icons/Edit';
 
 import './App.css';
 import defaultValues from './default-values'
@@ -20,7 +22,9 @@ const fetchOrPrepopulate = (key, defaultValues) => {
 function App() {
     const [updatingVersion, setUpdatingVersion] = useState(0);
 
+    const [editingTodo, setEditingTodo] = useState({});
     const [todoFormShown, setTodoFormShown] = useState(false);
+    const [editingShortcut, setEditingShortcut] = useState({});
     const [shortcutFormShown, setShortcutFormShown] = useState(false);
 
     let urls = fetchOrPrepopulate('urls', defaultValues.urls);
@@ -62,6 +66,14 @@ function App() {
                         <DeleteForever />
                       </IconButton>
 
+                      <IconButton aria-label="Edit" component="span" onClick={() => {
+                          setEditingTodo(todos.find(item => item.title === todoItem.title));
+                          setTodoFormShown(true);
+                        }
+                      }>
+                        <EditIcon />
+                      </IconButton>
+
                       <h4 style={{color: todoItem['done'] === undefined ? 'orange' : todoItem['done'] ? 'green' : 'red'}}>{idx + 1}_ {todoItem['title']}</h4>
                     </div>
                     {todoItem.desc && todoItem.desc}
@@ -74,9 +86,20 @@ function App() {
           }
           {todoFormShown ? 
             <Formik
-              initialValues={{ title: '', link: '' }}
+              initialValues={{ 
+                title: editingTodo.title || '',
+                link: editingTodo.link || ''
+              }}
               onSubmit={(values) => {
-                todos.push({title: values.title, link: values.link});
+                if (isEmpty(editingTodo)) {
+                  todos.push({title: values.title, link: values.link});
+                }
+                else {
+                  const todoItem = todos.find(item => item.title === editingTodo.title);
+                  todoItem.title = values.title;
+                  todoItem.link = values.link;
+                }
+                setEditingTodo({});
                 reactLocalStorage.setObject('todos', todos);
                 setTodoFormShown(false);
               }}
@@ -98,7 +121,7 @@ function App() {
                   <Button type="submit" style={{marginRight: "5px"}} variant="contained" color="primary">
                     Submit
                   </Button>
-                  <Button color="primary" onClick={() => setTodoFormShown(false)}>
+                  <Button color="primary" onClick={() => {setEditingTodo({}); setTodoFormShown(false)}}>
                     Cancel
                   </Button>
                 </div>
@@ -125,6 +148,14 @@ function App() {
                     <DeleteForever />
                   </IconButton>
 
+                  <IconButton aria-label="Edit" component="span" onClick={() => {
+                      setEditingShortcut(urls.find(item => item.keyword === keyToUrlItem[key].keyword));
+                      setShortcutFormShown(true);
+                    }
+                  }>
+                    <EditIcon />
+                  </IconButton>
+
                   <p>{key}: {keyToUrlItem[key].description} -> <a href={keyToUrlItem[key].url}>{keyToUrlItem[key].url}</a></p>
                 </div>
                 )
@@ -134,9 +165,23 @@ function App() {
         }
         {shortcutFormShown ? 
           <Formik
-          initialValues={{ keyword: '', description: '', url: '' }}
+          initialValues={{ 
+            keyword: editingShortcut.keyword || '',
+            description: editingShortcut.description || '',
+            url: editingShortcut.url || ''
+          }}
           onSubmit={(values) => {
-            urls.push({keyword: values.keyword, url: values.url, description: values.description});
+            if (isEmpty(editingShortcut)) {
+              urls.push({keyword: values.keyword, url: values.url, description: values.description});
+            }
+            else {
+              const shortcutItem = urls.find(item => item.keyword === editingShortcut.keyword);
+              shortcutItem.keyword = values.keyword;
+              shortcutItem.description = values.description;
+              shortcutItem.url = values.url;
+            }
+            
+            setEditingShortcut({});
             reactLocalStorage.setObject('urls', urls);
             setShortcutFormShown(false);
           }}
@@ -164,7 +209,7 @@ function App() {
               <Button type="submit" style={{marginRight: "5px"}} variant="contained" color="primary">
                 Submit
               </Button>
-              <Button color="primary" onClick={() => setShortcutFormShown(false)}>
+              <Button color="primary" onClick={() => {setEditingShortcut({}); setShortcutFormShown(false)}}>
                 Cancel
               </Button>
             </div>
